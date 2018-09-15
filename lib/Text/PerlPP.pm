@@ -6,7 +6,7 @@ package Text::PerlPP;
 # Semantic versioning, packed per Perl rules.  Must always be at least one
 # digit left of the decimal, and six digits right of the decimal.  For
 # prerelease versions, put an underscore before the last three digits.
-our $VERSION = '0.600001';
+our $VERSION = '0.600_002';
 
 use 5.010001;
 use strict;
@@ -714,7 +714,7 @@ my %CMDLINE_OPTS = (
 	OUTPUT_FILENAME => ['o','|output=s', ""],
 	SETS => ['s','|set:s%'],		# Extra data in %S, without text substitution
 	# --usage reserved
-	PRINT_VERSION => ['v','|version+'],
+	PRINT_VERSION => ['v','|V|version+'],
 
 	# Special-case for testing --- don't exit on --help &c.
 	NOEXIT_ON_HELP => ['z_noexit_on_help'],
