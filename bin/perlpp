@@ -181,7 +181,7 @@ Everything in a comment is ignored, suprisingly enough!
 
 Runs the given string using C<qx//>.  If the command fails (returns nonzero),
 execution halts unless C<-k> was given.  The stdout of the command is
-include with the rest of the output of the script.
+included with the rest of the output of the script.
 
 =item Command mode: C<< <?:command_name [optional args] ?> >>
 
