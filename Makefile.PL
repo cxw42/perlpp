@@ -67,6 +67,7 @@ WriteMakefile(
         'List::Util' => '1.33', # for any()
         'Pod::Usage' => '0',
         'rlib' => '0',
+        'Scalar::Util' => '0',
         'Text::Diff' => '0',   # for t/03-idempotency.t
         'Test::More' => '0',
         'Text::ParseWords' => '0',

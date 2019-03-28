@@ -13,90 +13,98 @@ use TestcaseList;
 # will be off here.
 
 my $testcases = TestcaseList->new(__LINE__);
-	# version
-$testcases->load('-v','',qr/\bversion\b/)->
+$testcases->load('-v','',qr/\bversion\b/)->		# version
 	('--version','',qr/\bversion\b/)
+	('-v -v','',qr/\bversion\b.*\bScript\b/s)
 
 	# Debug output
-	('-d','',qr/^package PPP_[0-9]*;/m)
+	(LSKIP 2, '-d','',qr/^package PPP_[0-9]*;/m)
 	('-d', '<?= 2+2 ?>', qr{print\s+2\+2\s*;})
 	('--debug', '<?= 2+2 ?>', qr{print\s+2\+2\s*;})
 	('-E', '<?= 2+2 ?>', qr{print\s+2\+2\s*;})
 
 	# Usage
-	('-h --z_noexit_on_help', '', qr/^Usage/)
+	(LSKIP 2, '-h --z_noexit_on_help', '', qr/^Usage/)
 	('--help --z_noexit_on_help', '', qr/^Usage/)
 
 	# Eval at start of file
-	(['-e', q(my $foo=42;)], '<?= $foo ?>', qr/^42$/)
+	(LSKIP 2, ['-e', q(my $foo=42;)], '<?= $foo ?>', qr/^42$/)
 	(['--eval', q(my $foo=42;)],'<?= $foo ?>', qr/^42$/)
 	(['-d','-e', q(my $foo=42;)],'<?= $foo ?>', qr/^my \$foo=42;/m)
 	(['--debug','--eval', q(my $foo=42;)],'<?= $foo ?>', qr/^print\s+\$foo\s*;/m)
 
 	# Definitions: name formats
-	('-Dfoo', '<? print "yes" if $D{foo}; ?>',qr/^yes$/)
+	(LSKIP 2, '-Dfoo', '<? print "yes" if $D{foo}; ?>',qr/^yes$/)
 	('-Dfoo42', '<? print "yes" if $D{foo42}; ?>',qr/^yes$/)
 	('-Dfoo_42', '<? print "yes" if $D{foo_42}; ?>',qr/^yes$/)
 	('-D_x', '<? print "yes" if $D{_x}; ?>',qr/^yes$/)
 	('-D_1', '<? print "yes" if $D{_1}; ?>',qr/^yes$/)
 
 	# Definitions with --define
-	('--define foo', '<? print "yes" if $D{foo}; ?>',qr/^yes$/)
+	(LSKIP 2, '--define foo', '<? print "yes" if $D{foo}; ?>',qr/^yes$/)
 	('--define foo=42 --define bar=127', '<?= $D{foo} * $D{bar} ?>',qr/^5334$/)
 
 	# Definitions: :define/:undef
-	('','<?:define foo?><?:ifdef foo?>yes<?:else?>no<?:endif?>',qr/^yes$/)
+	(LSKIP 2, '','<?:define foo?><?:ifdef foo?>yes<?:else?>no<?:endif?>',qr/^yes$/)
 	('','<?:define foo 42?><?:ifdef foo?>yes<?:else?>no<?:endif?>',qr/^yes$/)
 	('','<?:define foo 42?><?= $D{foo} ?>',qr/^42$/)
 	('','<?:define foo "a" . "b" ?><?= $D{foo} ?>',qr/^ab$/)
 	('-Dfoo','<?:undef foo?><?:ifdef foo?>yes<?:else?>no<?:endif?>',qr/^no$/)
 
 	# Definitions: values
-	('-Dfoo=41025.5', '<?= $D{foo} ?>',qr/^41025.5$/)
+	(LSKIP 2, '-Dfoo=41025.5', '<?= $D{foo} ?>',qr/^41025.5$/)
 	('-D foo=2017', '<?= $D{foo} ?>',qr/^2017$/)
 	([qw(-D foo="blah")], '<?= $D{foo} ?>',qr/^blah$/)
 		# Have to escape the double-quotes so perl sees it as a string
 		# literal instead of a bareword.
-	('-D foo=42 -D bar=127', '<?= $D{foo} * $D{bar} ?>',qr/^5334$/)
+	(LSKIP 2, '-D foo=42 -D bar=127', '<?= $D{foo} * $D{bar} ?>',qr/^5334$/)
 	('', '<? $D{x}="%D always exists even if empty"; ?><?= $D{x} ?>', qr/^%D always exists even if empty$/)
 
+	# Default value of a -D variable is true.  Note: ifdef is tested below.
+	(LSKIP 2, '-D foo','<? my $foo; ?><?= $D{foo} ? "42" : "oops" ?>',qr/^42$/ )
+	('--define foo','<? my $foo; ?><?= $D{foo} ? "42" : "oops" ?>',qr/^42$/ )
+
 	# Textual substitution
-	('-Dfoo=42','<? my $foo; ?>foo',qr/^42$/ )
+	(LSKIP 2, '-Dfoo=42','<? my $foo; ?>foo',qr/^42$/ )
 	([q(-Dfoo="a phrase")],'<? my $foo; ?>foo',qr/^a phrase$/ )
 	(['-Dfoo="bar"'], '_foo foo foobar barfoo 1',qr/^_foo bar foobar barfoo 1$/ )
 	(['-Dfoo="bar"', '--define', 'barfoo'], '_foo foo foobar barfoo 2', qr/^_foo bar foobar barfoo 2$/ )
 
 	# Sets, which do not textually substitute
-	('-sfoo=42','<? my $foo; ?>foo',qr/^foo$/ )
+	(LSKIP 2, '-sfoo=42','<? my $foo; ?>foo',qr/^foo$/ )
 	('-sfoo=42','<? my $foo; ?><?= $S{foo} ?>',qr/^42$/ )
 	('--set foo=42','<? my $foo; ?>foo',qr/^foo$/ )
 	('--set foo=42','<? my $foo; ?><?= $S{foo} ?>',qr/^42$/ )
 
+	# Default value of a -s variable is true
+	(LSKIP 2, '-s foo','<? my $foo; ?><?= $S{foo} ? "42" : "oops" ?>',qr/^42$/ )
+	('--set foo','<? my $foo; ?><?= $S{foo} ? "42" : "oops" ?>',qr/^42$/ )
+
 	# Conditionals
-	('-Dfoo=42','<?:if foo==2?>yes<?:else?>no<?:endif?>',qr/^no$/ )
+	(LSKIP 2, '-Dfoo=42','<?:if foo==2?>yes<?:else?>no<?:endif?>',qr/^no$/ )
 	('-Dfoo=2','<?:if foo==2?>yes<?:else?>no<?:endif?>',qr/^yes$/ )
 	('-Dfoo','<?:if foo==2?>yes<?:else?>no<?:endif?>',qr/^no$/ )
 	('-Dfoo','<?:if foo==1?>yes<?:else?>no<?:endif?>',qr/^yes$/ )
 		# The default value is true, which compares equal to 1.
-	('-Dfoo','<?:if foo?>yes<?:else?>no<?:endif?>',qr/^yes$/ )
+	(LSKIP 1, '-Dfoo','<?:if foo?>yes<?:else?>no<?:endif?>',qr/^yes$/ )
 	('','<?:if foo?>yes<?:else?>no<?:endif?>',qr/^no$/ )
 	('','<?:if foo==2?>yes<?:else?>no<?:endif?>',qr/^no$/ )
 		# For consistency, all :if tests evaluate to false if the
 		# named variable is not defined.
 
 	# Undefining
-	('-Dfoo','<?:undef foo?><?:if foo?>yes<?:else?>no<?:endif?>',qr/^no$/ )
-	#
+	(LSKIP 4, '-Dfoo','<?:undef foo?><?:if foo?>yes<?:else?>no<?:endif?>',qr/^no$/ )
+
 	# Three forms of elsif
-	('', '<?:if foo eq "1" ?>yes<?:elif foo eq "x" ?>maybe<?:else?>no<?:endif?>', qr/^no$/)
+	(LSKIP 2, '', '<?:if foo eq "1" ?>yes<?:elif foo eq "x" ?>maybe<?:else?>no<?:endif?>', qr/^no$/)
 	('', '<?:if foo eq "1" ?>yes<?:elsif foo eq "x" ?>maybe<?:else?>no<?:endif?>', qr/^no$/)
 	('', '<?:if foo eq "1" ?>yes<?:elseif foo eq "x" ?>maybe<?:else?>no<?:endif?>', qr/^no$/)
 
 	# elsif with definitions
-	('-Dfoo', '<?:if foo eq "1" ?>yes<?:elsif foo eq "x" ?>maybe<?:else?>no<?:endif?>', qr/^yes$/)
+	(LSKIP 2, '-Dfoo', '<?:if foo eq "1" ?>yes<?:elsif foo eq "x" ?>maybe<?:else?>no<?:endif?>', qr/^yes$/)
 	('-Dfoo=1', '<?:if foo eq "1" ?>yes<?:elsif foo eq "x" ?>maybe<?:else?>no<?:endif?>', qr/^yes$/)
 		# Automatic conversion of numeric 1 to string in "eq" context
-	(['-Dfoo="x"'], '<?= $D{foo} . "\n" ?><?:if foo eq "1" ?>yes<?:elsif foo eq "x" ?>maybe<?:else?>no<?:endif?>', qr/^x\nmaybe$/)
+	(LSKIP 1, ['-Dfoo="x"'], '<?= $D{foo} . "\n" ?><?:if foo eq "1" ?>yes<?:elsif foo eq "x" ?>maybe<?:else?>no<?:endif?>', qr/^x\nmaybe$/)
 	(['-Dfoo="y"'], '<?:if foo eq "1" ?>yes<?:elsif foo eq "x" ?>maybe<?:else?>no<?:endif?>', qr/^no$/)
 
 ; #$testcases

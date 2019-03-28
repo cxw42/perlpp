@@ -15,7 +15,50 @@ use warnings;
 use Getopt::Long 2.5 qw(GetOptionsFromArray);
 use Pod::Usage;
 
-# === Constants ===========================================================
+# ### Documentation ##################################################### {{{1
+# This is not the main documentation, which is in bin/perlpp.
+
+=pod
+
+=encoding UTF-8
+
+=head1 NAME
+
+Text::PerlPP - Perl preprocessor: process Perl code within any text file
+
+=head1 USAGE
+
+	use Text::PerlPP;
+	Text::PerlPP->new->Main(\@ARGV);
+
+You can pass any array reference to C<Main()>.  The array you provide may be
+modified by PerlPP.  See L<README.md> or L<perldoc perlpp|perlpp> for details
+of the options and input format.
+
+=head1 BUGS
+
+Please report any bugs or feature requests through GitHub, via
+L<https://github.com/interpreters/perlpp/issues>.
+
+=head1 AUTHORS
+
+Andrey Shubin (d-ash at Github; C<andrey.shubin@gmail.com>) and
+Chris White (cxw42 at Github; C<cxwembedded@gmail.com>).
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright 2013-2018 Andrey Shubin and Christopher White.
+
+This program is distributed under the MIT (X11) License:
+L<http://www.opensource.org/licenses/mit-license.php>.
+See file L</LICENSE> for the full text.
+
+=head1 FUNCTIONS
+
+=cut
+
+# }}}1
+# === Constants ========================================================= {{{1
 
 use constant true			=> !!1;
 use constant false			=> !!0;
@@ -63,7 +106,8 @@ use constant PPP_SELF_INSIDE => 'PSelf';
 # Debugging info
 my @OBModeNames = qw(plain capture code echo command comment);
 
-# === Globals =============================================================
+# }}}1
+# === Globals =========================================================== {{{1
 
 our @Instances;		# Hold the instance associated with each package
 
@@ -100,7 +144,8 @@ sub _make_instance {
 
 # Also, add a variable to the PPP_* pointing to the encapsulated state.
 
-# === Internal routines ===================================================
+# }}}1
+# === Worker routines =================================================== {{{1
 
 # An alias for print().  This is used so that you can find print statements
 # in the generated script by searching for "print".
@@ -695,7 +740,8 @@ sub OutputResult {
 	close( $out_fh ) or die $!;
 } #OutputResult()
 
-# === Command line parsing ================================================
+# }}}1
+# === Command line parsing ============================================== {{{1
 
 my %CMDLINE_OPTS = (
 	# hash from internal name to array reference of
@@ -796,10 +842,23 @@ sub _parse_command_line {
 	return true;	# Go ahead and run
 } #_parse_command_line()
 
-# === Main ================================================================
+# }}}1
+# === Main ============================================================== {{{1
+
+=head2 Main
+
+The main routine invoked by bin/perlpp.  Typical usage:
+
+	Text::PerlPP->new->Main(\@ARGV);
+
+Runs on an instance of C<Text::PerlPP>.  Takes an arrayref of the
+command-line arguments.  Produces output to STDOUT and/or STDERR.
+
+=cut
 
 sub Main {
-	my $self = shift or die("Please use Text::PerlPP->new()->Main");
+	my $self = shift;
+	die "Please use Text::PerlPP->new()->Main" unless ref $self;
 	my $lrArgv = shift // [];
 
 	unless(_parse_command_line( $lrArgv, $self->{Opts} )) {
@@ -900,8 +959,6 @@ sub Main {
 	emit "my %S = (\n";
 	for my $defname (keys %{$self->{Opts}->{SETS}}) {
 		my $val = ${$self->{Opts}->{SETS}}{$defname};
-		if(!defined($val)) {
-		}
 		$val = 'true' if $val eq '';
 			# "-s foo" (without a value) sets it to _true_ so
 			# "if($S{foo})" will work.  Getopt::Long gives us '' as the
@@ -945,50 +1002,16 @@ sub Main {
 	return EXIT_OK;
 } #Main()
 
+=head2 new
+
+Create a new instance.  Usage: C<< Text::PerlPP->new() >>.  No parameters.
+
+=cut
+
 sub new {
 	my $class = shift;
 	return bless _make_instance(), $class;
 }
 
 1;
-__END__
-# ### Documentation #######################################################
-
-=pod
-
-=encoding UTF-8
-
-=head1 NAME
-
-Text::PerlPP - Perl preprocessor: process Perl code within any text file
-
-=head1 USAGE
-
-	use Text::PerlPP;
-	Text::PerlPP::Main(\@ARGV);
-
-You can pass any array reference to C<Main()>.  The array you provide may be
-modified by PerlPP.  See L<README.md> or L<perldoc perlpp|perlpp> for details
-of the options and input format.
-
-=head1 BUGS
-
-Please report any bugs or feature requests through GitHub, via
-L<https://github.com/interpreters/perlpp/issues>.
-
-=head1 AUTHORS
-
-Andrey Shubin (d-ash at Github; C<andrey.shubin@gmail.com>) and
-Chris White (cxw42 at Github; C<cxwembedded@gmail.com>).
-
-=head1 LICENSE AND COPYRIGHT
-
-Copyright 2013-2018 Andrey Shubin and Christopher White.
-
-This program is distributed under the MIT (X11) License:
-L<http://www.opensource.org/licenses/mit-license.php>.
-See file L</LICENSE> for the full text.
-
-=cut
-
-# vi: set ts=4 sts=0 sw=4 noet ai: #
+# vi: set ts=4 sts=0 sw=4 noet ai fdm=marker: #
