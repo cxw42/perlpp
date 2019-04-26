@@ -86,6 +86,12 @@ WriteMakefile(
                 web  => 'https://github.com/interpreters/perlpp',
             },
         },
+        x_authority => 'cpan:CXW',
+        x_contributors => [
+			# Use CPAN emails where possible, so MetaCPAN will pick them up.
+			'Andrew Shubin <andrey.shubin@gmail.com>',
+			'Christopher White <cxw@cpan.org>',
+        ],
     },
 
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },

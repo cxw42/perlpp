@@ -8,6 +8,7 @@ package Text::PerlPP;
 # prerelease versions, put an underscore before the last three digits.
 our $VERSION = '0.600_002';
 
+# === Imports =========================================================== {{{1
 use 5.010001;
 use strict;
 use warnings;
@@ -15,7 +16,8 @@ use warnings;
 use Getopt::Long 2.5 qw(GetOptionsFromArray);
 use Pod::Usage;
 
-# ### Documentation ##################################################### {{{1
+# }}}1
+# === Documentation ===================================================== {{{1
 # This is not the main documentation, which is in bin/perlpp.
 
 =pod
@@ -24,7 +26,7 @@ use Pod::Usage;
 
 =head1 NAME
 
-Text::PerlPP - Perl preprocessor: process Perl code within any text file
+Text::PerlPP - Process Perl code within any text file (PHP-like)
 
 =head1 USAGE
 
@@ -107,7 +109,7 @@ use constant PPP_SELF_INSIDE => 'PSelf';
 my @OBModeNames = qw(plain capture code echo command comment);
 
 # }}}1
-# === Globals =========================================================== {{{1
+# === Instance data and constructor implementation ====================== {{{1
 
 our @Instances;		# Hold the instance associated with each package
 
